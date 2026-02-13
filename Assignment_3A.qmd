@@ -1,0 +1,14 @@
+---
+title: "Assignment 3A"
+author: "Emily El Mouaquite"
+format: html
+editor: visual
+---
+
+## Approach
+
+The below formula will be applied to information in a data frame based off of my Assignment 2A movie ratings:
+
+*Predicted Rating = Global Mean + User Bias + Item Bias*
+
+Using this, I will add the global mean (mean of all movie ratings), user bias (global mean subtracted from the individual rater average), and movie bias (global mean subtracted from the movies' average ratings) to the data frame. Then, I will be able to create a variable that implements the above formula, and populate the null values with global baseline estimate ratings for each unseen/ unrated movie.
