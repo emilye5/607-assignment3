@@ -1,0 +1,10 @@
+---
+title: "Assignment_3B"
+author: "Emily El Mouaquite"
+format: html
+editor: visual
+---
+
+## Approach
+
+I will begin by asking an LLM to generate a data set that includes the daily high and low temperatures for two different cities over the past eighteen months. Using this data, I will then use window functions in dplyr, grouped by city and ordered by date, to calculate the YTD average & six day moving average for each daily weather record. A challenge that I might anticipate with this data is that I must also decide how to analyze both the high & low temperatures, and ensure that window functions are applied in the way that I intend for them to be.
