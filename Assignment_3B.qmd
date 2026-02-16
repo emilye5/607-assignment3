@@ -1,5 +1,5 @@
 ---
-title: "Assignment_3B"
+title: "Assignment 3B: Temperature Window Functions"
 author: "Emily El Mouaquite"
 format: html
 editor: visual
@@ -8,3 +8,67 @@ editor: visual
 ## Approach
 
 I will begin by asking an LLM to generate a data set that includes the daily high and low temperatures for two different cities over the past eighteen months. Using this data, I will then use window functions in dplyr, grouped by city and ordered by date, to calculate the YTD average & six day moving average for each daily weather record. A challenge that I might anticipate with this data is that I must also decide how to analyze both the high & low temperatures, and ensure that window functions are applied in the way that I intend for them to be.
+
+## Code Base
+
+### Introduction
+
+An LLM generated a data set with the high and low temperatures in Phoenix, Arizona and Seattle, Washington over the past 18 months (August 1st 2024 - February 15th 2026). This data is stored in the file temperature.csv.
+
+```{r}
+# import csv
+temperatures <- read.csv("temperature.csv")
+```
+
+### Body
+
+```{r}
+# load dplyr
+library(dplyr)
+# convert date column data type
+temperatures$Date <- as.Date(temperatures$Date)
+```
+
+Year to Date Averages
+
+```{r}
+temperatures <- temperatures %>%
+  filter(format(Date, "%Y") == "2026") %>%
+  group_by(City) %>%
+  arrange(Date) %>%
+  mutate(
+    YTD_high = cummean(High_Temp_F),
+    YTD_low  = cummean(Low_Temp_F)
+  ) %>%
+  ungroup()
+temperatures %>%
+  group_by(City) %>%
+  summarise(
+    overall_avg_high = mean(High_Temp_F),
+    overall_avg_low  = mean(Low_Temp_F)
+  )
+```
+
+The YTD average high temperature in Phoenix is 70.7, while in Seattle it is 43.54. The average low temperatures are 50.19 in Phoenix and 31.89 in Seattle.
+
+Six Day Moving Averages
+
+```{r}
+temperatures <- temperatures %>%
+  filter(format(Date, "%Y") == "2026") %>%
+  group_by(City) %>%
+  arrange(Date) %>%
+  mutate(
+    MA_high = stats::filter(High_Temp_F, rep(1/6, 6), sides = 1),
+    MA_low  = stats::filter(Low_Temp_F,  rep(1/6, 6), sides = 1)
+  ) %>%
+  ungroup()
+temperatures %>%
+  arrange(Date) %>%
+  slice_tail(n = 6) %>%
+  select(City, Date, MA_high, MA_low)
+```
+Above are the 6 day moving averages for the past 6 days in each city. 
+
+### Conclusion
+This assignment was extremely helpful in getting some dplyr practice. To further expand on it, the temperatures in the two cities could be compared, the standard deviation could be calculated, or future temperatures could be forecasted. 
