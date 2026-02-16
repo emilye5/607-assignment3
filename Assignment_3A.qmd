@@ -1,5 +1,5 @@
 ---
-title: "Assignment 3A"
+title: "Assignment 3A: Global Baseline Estimate"
 author: "Emily El Mouaquite"
 format: html
 editor: visual
@@ -12,3 +12,64 @@ The below formula will be applied to information in a data frame based off of my
 *Predicted Rating = Global Mean + User Bias + Item Bias*
 
 Using this, I will add the global mean (mean of all movie ratings), user bias (global mean subtracted from the individual rater average), and movie bias (global mean subtracted from the movies' average ratings) to the data frame. Then, I will be able to create a variable that implements the above formula, and populate the null values with global baseline estimate ratings for each unseen/ unrated movie.
+
+## Code Base
+
+### Introduction
+
+The data that I am going to use for this project are derived from my Assignment 2A movie ratings. This includes the rater's name, the movie names, their ratings.
+
+```{r}
+# Read movie ratings CSV, convert 0 ratings (movies not seen by raters) to null
+df <- read.csv("ghibli_ratings.csv", na.strings = "0")
+```
+
+### Body
+
+In order to calculate the predicted movie ratings for each rater's unseen movies using the global baseline estimate, each rater's average rating and each movie's average rating will need to be calculated and added to the data frame.
+
+```{r}
+# ensure all ratings are numeric
+df[, -1] <- sapply(df[, -1], as.numeric)
+#rater averages
+df$RaterAverage <- rowMeans(df[ , -1], na.rm=TRUE)
+# movie averages
+movie_avg <- colMeans(df[, -1], na.rm = TRUE)
+df[nrow(df) + 1, ] <- c("MovieAverage", as.character(movie_avg))
+# ensure all averages are numeric
+df[, -1] <- sapply(df[, -1], as.numeric)
+```
+
+The global mean would then be able to be defined as the intersection of the movie averages and the rater averages in the data frame.
+```{r}
+# create global mean variable
+global_mean <- df$RaterAverage[6]
+global_mean <- as.numeric(global_mean)
+```
+
+After defining the global mean, the user and item biases are defined. 
+```{r}
+# user bias
+user_bias <- df$RaterAverage - global_mean
+# item bias
+item_bias <- movie_avg - global_mean 
+```
+
+The last step would be to implement the global baseline estimate formula with the predicted ratings for each NA value. 
+```{r}
+for(u in 1:(nrow(df)-1)) {         
+  for(i in 2:(ncol(df)-1)) {       
+    if(is.na(df[u, i])) {
+      df[u, i] <- global_mean + user_bias[u] + item_bias[i-1]
+    }
+  }
+}
+```
+
+This creates the below data frame. 
+```{r}
+print(df)
+```
+
+## Conclusion
+My largest challenge throughout this assignment was ensuring that the data types were correct. I had trouble ordering my code in a way that did not overwrite the numeric data type. This issue aside, I was able to populate the data frame with the predicted ratings for each critic's unseen movies. To further verify this work, one might remove some of the ratings that were collected from the critics to see how well the global baseline estimate is actually predticing them. 
